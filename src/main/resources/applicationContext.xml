@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/util https://www.springframework.org/schema/util/spring-util.xsd">
+
+    <context:property-placeholder location="classpath:musicPlayer.properties"/>
+    <context:component-scan base-package="ru.daemon75.springcourse"/>
+
+<!--    <bean id="musicRockBean" class="ru.daemon75.springcourse.console_app.RockMusic"/>-->
+<!--    <bean id="musicClassicBean" class="ru.daemon75.springcourse.console_app.ClassicMusic"/>-->
+<!--    <bean id="musicFolkBean" class="ru.daemon75.springcourse.console_app.FolkMusic"/>-->
+<!--    <bean id="musicPlayer" class="ru.daemon75.springcourse.console_app.MusicPlayer" scope="prototype">-->
+<!--        <constructor-arg>-->
+<!--            <util:list>-->
+<!--                <ref bean="musicRockBean"/>-->
+<!--                <ref bean="musicClassicBean"/>-->
+<!--                <ref bean="musicFolkBean"/>-->
+<!--            </util:list>-->
+<!--        </constructor-arg>-->
+
+<!--        <property name="music">-->
+<!--        <util:list>-->
+<!--            <ref bean="musicRockBean"/>-->
+<!--            <ref bean="musicClassicBean"/>-->
+<!--            <ref bean="musicFolkBean"/>-->
+<!--        </util:list>-->
+<!--    </property>-->
+<!--        <property name="username" value="${musicPlayer.username}"/>-->
+<!--        <property name="volume" value="${musicPlayer.volume}"/>-->
+<!--    </bean>-->
+
+</beans>
