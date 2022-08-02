@@ -1,124 +1,100 @@
 package ru.daemon75.springcourse.dao;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.daemon75.springcourse.models.User;
 
-import java.sql.*;
+import java.sql.Array;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class UserDao {
-    //    private List<User> users;
-    AtomicInteger counter = new AtomicInteger();
+    private final JdbcTemplate jdbcTemplate;
 
     private static final String URL = "jdbc:postgresql://localhost:5432/spring_db";
     private static final String USERNAME = "spring";
     private static final String PASSWORD = "spring";
 
-    private static Connection connection;
-
-    static {
-        try {
-            Class.forName("org.postgresql.Driver");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        try {
-            connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+    @Autowired
+    public UserDao(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public List<User> allUsers() {
-        List<User> users = new ArrayList<>();
-        try {
-            Statement statement = connection.createStatement();
-            String SQL = "SELECT * FROM users";
-            ResultSet resultSet = statement.executeQuery(SQL);
-            while (resultSet.next()) {
-                User user = new User();
-                user.setId(resultSet.getInt("id"));
-                user.setName((resultSet.getString("name")));
-                user.setAge(resultSet.getInt("age"));
-                user.setEmail(resultSet.getString("email"));
-                users.add(user);
-            }
+        return jdbcTemplate.query("SELECT * FROM users", new BeanPropertyRowMapper<>(User.class));
+    }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
+    public User show(int id) {
+        return jdbcTemplate.query("SELECT * FROM users WHERE id=?", new BeanPropertyRowMapper<>(User.class), id)
+                .stream().findAny().orElse(null);
+    }
+
+    public void save(User user) {
+        jdbcTemplate.update("INSERT INTO users VALUES (1,?,?,?)",
+                user.getName(), user.getAge(), user.getEmail());
+    }
+
+    public void update(int id, User user) {
+        jdbcTemplate.update("UPDATE users SET name = ?, age = ?, email = ? WHERE id = ?",
+                user.getName(), user.getAge(), user.getEmail(), id);
+    }
+
+    public void delete(int id) {
+        jdbcTemplate.update("DELETE FROM users WHERE id = ?", id);
+    }
+
+    /////////////////////
+    //// Test Batch Update method
+    /////////////////////
+
+    public void testMassiveSimpleUpdate() {
+        List<User> userList = create1000users();
+        long timeBefore = System.currentTimeMillis();
+        for (User user : userList) {
+            jdbcTemplate.update("INSERT INTO users VALUES (?, ?, ?, ?)",
+                    user.getId(), user.getName(), user.getAge(), user.getEmail());
+        }
+        long timeAfter = System.currentTimeMillis();
+        System.out.println("Time: " + (timeAfter - timeBefore));
+    }
+
+    private List<User> create1000users() {
+
+        List<User> users = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            users.add(new User(i + 1000, "user" + i, 33, "user" + i + "@mail.com"));
         }
         return users;
     }
 
-    public User show(int id) {
-        // if 'try' invoke exception
-        User user = null;
+    public void testMassiveBatchUpdate() {
+        List<User> userList = create1000users();
+        long timeBefore = System.currentTimeMillis();
+        jdbcTemplate.batchUpdate("INSERT INTO users VALUES (?, ?, ?, ?)", new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setInt(1, userList.get(i).getId());
+                ps.setString(2, userList.get(i).getName());
+                ps.setInt(3, userList.get(i).getAge());
+                ps.setString(4, userList.get(i).getEmail());
+            }
 
-        try {
-            PreparedStatement preparedStatement =
-                    connection.prepareStatement("SELECT * FROM users WHERE id=?");
-
-            preparedStatement.setInt(1, id);
-            ResultSet resultSet =preparedStatement.executeQuery();
-            // if many entries <- not uniq id
-            resultSet.next();
-
-            user = new User();
-
-            user.setId(resultSet.getInt("id"));
-            user.setName(resultSet.getString("name"));
-            user.setAge(resultSet.getInt("age"));
-            user.setEmail(resultSet.getString("email"));
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return user;
+            @Override
+            public int getBatchSize() {
+                return userList.size();
+            }
+        });
+        long timeAfter = System.currentTimeMillis();
+        System.out.println("Time: " + (timeAfter - timeBefore));
     }
 
-    public void save(User user) {
-
-        try {
-            PreparedStatement preparedStatement =
-                    connection.prepareStatement("INSERT INTO users VALUES(1, ?, ?, ?)");
-            preparedStatement.setString(1, user.getName());
-            preparedStatement.setInt(2, user.getAge());
-            preparedStatement.setString(3, user.getEmail());
-
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void update(int id, User user) {
-        try {
-            PreparedStatement preparedStatement =
-                    connection.prepareStatement("UPDATE users SET name = ?, age = ?, email = ? WHERE id = ?");
-
-            preparedStatement.setString(1, user.getName());
-            preparedStatement.setInt(2, user.getAge());
-            preparedStatement.setString(3, user.getEmail());
-            preparedStatement.setInt(4, id);
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void delete(int id) {
-        try {
-            PreparedStatement preparedStatement =
-                    connection.prepareStatement("DELETE  FROM users WHERE id = ?");
-            preparedStatement.setInt(1, id);
-
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-
+    public void eraseTestUsers() {
+        jdbcTemplate.update("DELETE FROM users WHERE id>?", 999);
     }
 }

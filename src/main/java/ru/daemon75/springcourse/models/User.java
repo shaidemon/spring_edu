@@ -9,7 +9,7 @@ public class User {
     private int id;
 
     @NotEmpty(message = "Name should not be empty")
-    @Size(min = 2, max = 30, message = "Name should be from 2 to 30")
+    @Size(min = 2, max = 30, message = "Name should be from 2 to 30 letters")
     private  String name;
 
     @Min(value = 0, message = "Age should be more than 0")
@@ -20,7 +20,6 @@ public class User {
     private String email;
 
     public User(){
-
     }
 
     public User(int id, String name, int age, String email) {
@@ -28,7 +27,6 @@ public class User {
         this.name = name;
         this.age = age;
         this.email = email;
-
     }
 
     public int getId() {
