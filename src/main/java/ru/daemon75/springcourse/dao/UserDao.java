@@ -7,7 +7,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.daemon75.springcourse.models.User;
 
-import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -16,10 +15,6 @@ import java.util.List;
 @Component
 public class UserDao {
     private final JdbcTemplate jdbcTemplate;
-
-    private static final String URL = "jdbc:postgresql://localhost:5432/spring_db";
-    private static final String USERNAME = "spring";
-    private static final String PASSWORD = "spring";
 
     @Autowired
     public UserDao(JdbcTemplate jdbcTemplate) {
@@ -36,7 +31,7 @@ public class UserDao {
     }
 
     public void save(User user) {
-        jdbcTemplate.update("INSERT INTO users VALUES (1,?,?,?)",
+        jdbcTemplate.update("INSERT INTO users (name, age, email) VALUES (?,?,?)",
                 user.getName(), user.getAge(), user.getEmail());
     }
 
