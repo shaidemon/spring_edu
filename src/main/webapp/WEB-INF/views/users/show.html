@@ -11,6 +11,7 @@
 User Id: <span th:text="${user.getId()}">VALUE</span> <br>
 <span th:text="${user.getName()}">VALUE</span> , <span th:text="${user.getAge()}">VALUE</span>
 <p th:text="${user.getEmail()}">VALUE</p>
+<p th:text="${user.getAddress()}">VALUE</p>
 
 <a th:href="@{/users/{id}/edit(id=${user.getId()})}">Edit Profile</a>
 <form th:method="DELETE" th:action="@{/users/{id}(id=${user.getId()})}" >

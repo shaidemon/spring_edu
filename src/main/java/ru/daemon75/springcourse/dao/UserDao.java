@@ -11,7 +11,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class UserDao {
@@ -37,13 +36,13 @@ public class UserDao {
     }
 
     public void save(User user) {
-        jdbcTemplate.update("INSERT INTO users (name, age, email) VALUES (?,?,?)",
-                user.getName(), user.getAge(), user.getEmail());
+        jdbcTemplate.update("INSERT INTO users (name, age, email, address) VALUES (?,?,?,?)",
+                user.getName(), user.getAge(), user.getEmail(), user.getAddress());
     }
 
     public void update(int id, User user) {
-        jdbcTemplate.update("UPDATE users SET name = ?, age = ?, email = ? WHERE id = ?",
-                user.getName(), user.getAge(), user.getEmail(), id);
+        jdbcTemplate.update("UPDATE users SET name = ?, age = ?, email = ?, address = ? WHERE id = ?",
+                user.getName(), user.getAge(), user.getEmail(), user.getAddress(), id);
     }
 
     public void delete(int id) {
@@ -69,7 +68,7 @@ public class UserDao {
 
         List<User> users = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
-            users.add(new User(i + 1000, "user" + i, 33, "user" + i + "@mail.com"));
+            users.add(new User(i + 1000, "user" + i, 33, "user" + i + "@mail.com", "Some address"));
         }
         return users;
     }
@@ -77,13 +76,14 @@ public class UserDao {
     public void testMassiveBatchUpdate() {
         List<User> userList = create1000users();
         long timeBefore = System.currentTimeMillis();
-        jdbcTemplate.batchUpdate("INSERT INTO users VALUES (?, ?, ?, ?)", new BatchPreparedStatementSetter() {
+        jdbcTemplate.batchUpdate("INSERT INTO users VALUES (?, ?, ?, ?, ?)", new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ps.setInt(1, userList.get(i).getId());
                 ps.setString(2, userList.get(i).getName());
                 ps.setInt(3, userList.get(i).getAge());
                 ps.setString(4, userList.get(i).getEmail());
+                ps.setString(5, userList.get(i).getAddress());
             }
 
             @Override
