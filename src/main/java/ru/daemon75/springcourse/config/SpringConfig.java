@@ -7,9 +7,12 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -27,16 +30,17 @@ import java.util.Properties;
 @ComponentScan("ru.daemon75.springcourse")
 @EnableWebMvc
 @EnableTransactionManagement
+@EnableJpaRepositories("ru.daemon75.springcourse.repositories")
 @PropertySource("classpath:hibernate.properties")
 public class SpringConfig implements WebMvcConfigurer {
     private final ApplicationContext applicationContext;
     private final Environment environment;
 
-@Autowired
+    @Autowired
     public SpringConfig(ApplicationContext applicationContext, Environment environment) {
         this.applicationContext = applicationContext;
-    this.environment = environment;
-}
+        this.environment = environment;
+    }
 
     @Bean
     public SpringResourceTemplateResolver templateResolver() {
@@ -64,22 +68,22 @@ public class SpringConfig implements WebMvcConfigurer {
         registry.viewResolver(resolver);
     }
 
-/*    JDBC Template
-**    @Bean
-**    public DataSource dataSource(){
-**        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-**        dataSource.setDriverClassName(Objects.requireNonNull(environment.getProperty("driver")));
-**        dataSource.setUrl(environment.getProperty("url"));
-**        dataSource.setUsername(environment.getProperty("username"));
-**        dataSource.setPassword(environment.getProperty("password"));
-**        return dataSource;
-**    }
-**
-**    @Bean
-**    public JdbcTemplate jdbcTemplate(){
-**        return new JdbcTemplate(dataSource());
-**    }
-*/
+    /*    JDBC Template
+     **    @Bean
+     **    public DataSource dataSource(){
+     **        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+     **        dataSource.setDriverClassName(Objects.requireNonNull(environment.getProperty("driver")));
+     **        dataSource.setUrl(environment.getProperty("url"));
+     **        dataSource.setUsername(environment.getProperty("username"));
+     **        dataSource.setPassword(environment.getProperty("password"));
+     **        return dataSource;
+     **    }
+     **
+     **    @Bean
+     **    public JdbcTemplate jdbcTemplate(){
+     **        return new JdbcTemplate(dataSource());
+     **    }
+     */
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
@@ -90,27 +94,43 @@ public class SpringConfig implements WebMvcConfigurer {
         return dataSource;
     }
 
-    private Properties hibernateProperties(){
+    private Properties hibernateProperties() {
         Properties properties = new Properties();
         properties.put("hibernate.dialect", environment.getRequiredProperty("hibernate.dialect"));
         properties.put("hibernate.show_sql", environment.getRequiredProperty("hibernate.show_sql"));
         return properties;
     }
 
-    @Bean
-    public LocalSessionFactoryBean sessionFactory() {
-        LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
-        sessionFactory.setDataSource(dataSource());
-        sessionFactory.setPackagesToScan("ru.daemon75.springcourse.models");
-        sessionFactory.setHibernateProperties(hibernateProperties());
-        return sessionFactory;
-    }
+    // This is for UserDao for UserValidator for getByEmail()
+        @Bean
+        public LocalSessionFactoryBean sessionFactory() {
+            LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
+            sessionFactory.setDataSource(dataSource());
+            sessionFactory.setPackagesToScan("ru.daemon75.springcourse.models");
+            sessionFactory.setHibernateProperties(hibernateProperties());
+            return sessionFactory;
+        }
 
+    @Bean
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
+        final LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+        em.setDataSource(dataSource());
+        em.setPackagesToScan("ru.daemon75.springcourse.models");
+        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+        em.setJpaVendorAdapter(vendorAdapter);
+        em.setJpaProperties(hibernateProperties());
+        return em;
+    }
+    // This is for Hibernate-alone functionality
+    //    public PlatformTransactionManager transactionManager() {
+//        HibernateTransactionManager transactionManager = new HibernateTransactionManager();
+//        transactionManager.setSessionFactory(sessionFactory().getObject());
+//        return transactionManager;
+//    }
     @Bean
     public PlatformTransactionManager transactionManager() {
-        HibernateTransactionManager transactionManager = new HibernateTransactionManager();
-        transactionManager.setSessionFactory(sessionFactory().getObject());
+        JpaTransactionManager transactionManager = new JpaTransactionManager();
+        transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
         return transactionManager;
     }
-
 }
