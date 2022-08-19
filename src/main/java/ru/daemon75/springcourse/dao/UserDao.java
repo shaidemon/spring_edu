@@ -1,10 +1,13 @@
 package ru.daemon75.springcourse.dao;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.daemon75.springcourse.models.User;
 
 import java.sql.PreparedStatement;
@@ -14,43 +17,47 @@ import java.util.List;
 
 @Component
 public class UserDao {
-    private final JdbcTemplate jdbcTemplate;
+//    private final JdbcTemplate jdbcTemplate;
+    private final SessionFactory sessionFactory;
 
     @Autowired
-    public UserDao(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    public UserDao(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
 
+    @Transactional(readOnly = true)
     public List<User> allUsers() {
-        return jdbcTemplate.query("SELECT * FROM users", new BeanPropertyRowMapper<>(User.class));
+        Session session = sessionFactory.getCurrentSession();
+        return session.createQuery("select u from User u", User.class).getResultList();
     }
 
     public User getById(int id) {
-        return jdbcTemplate.query("SELECT * FROM users WHERE id=?", new BeanPropertyRowMapper<>(User.class), id)
-                .stream().findAny().orElse(null);
+        return null;
     }
 
     public User getByEmail(String email) {
-        return jdbcTemplate.query("SELECT * FROM users WHERE email=?", new BeanPropertyRowMapper<>(User.class), email)
-                .stream().findAny().orElse(null);
+        return null;
+//                jdbcTemplate.query("SELECT * FROM users WHERE email=?", new BeanPropertyRowMapper<>(User.class), email)
+//                .stream().findAny().orElse(null);
     }
 
     public void save(User user) {
-        jdbcTemplate.update("INSERT INTO users (name, age, email, address) VALUES (?,?,?,?)",
-                user.getName(), user.getAge(), user.getEmail(), user.getAddress());
+//        jdbcTemplate.update("INSERT INTO users (name, age, email, address) VALUES (?,?,?,?)",
+//                user.getName(), user.getAge(), user.getEmail(), user.getAddress());
     }
 
     public void update(int id, User user) {
-        jdbcTemplate.update("UPDATE users SET name = ?, age = ?, email = ?, address = ? WHERE id = ?",
-                user.getName(), user.getAge(), user.getEmail(), user.getAddress(), id);
+//        jdbcTemplate.update("UPDATE users SET name = ?, age = ?, email = ?, address = ? WHERE id = ?",
+//                user.getName(), user.getAge(), user.getEmail(), user.getAddress(), id);
     }
 
     public void delete(int id) {
-        jdbcTemplate.update("DELETE FROM users WHERE id = ?", id);
+//        jdbcTemplate.update("DELETE FROM users WHERE id = ?", id);
     }
 
+/*
     /////////////////////
-    //// Test Batch Update method
+    //// Test Batch Update method (JDBC Template)
     /////////////////////
 
     public void testMassiveSimpleUpdate() {
@@ -98,4 +105,5 @@ public class UserDao {
     public void eraseTestUsers() {
         jdbcTemplate.update("DELETE FROM users WHERE id>?", 999);
     }
+ */
 }

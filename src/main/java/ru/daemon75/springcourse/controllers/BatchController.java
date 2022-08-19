@@ -5,8 +5,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.daemon75.springcourse.dao.UserDao;
 
-@Controller
-@RequestMapping("/test-batch")
+ @Controller
+ @RequestMapping("/test-batch")
 
 public class BatchController {
     private final UserDao userDao;
@@ -19,7 +19,7 @@ public class BatchController {
     public String index() {
         return "/batch/test-batch-menu";
     }
-
+/*
     @GetMapping("/simple")
     public String updateSimple() {
         userDao.testMassiveSimpleUpdate();
@@ -37,4 +37,6 @@ public class BatchController {
         userDao.eraseTestUsers();
         return "redirect:/users";
     }
+
+ */
 }
