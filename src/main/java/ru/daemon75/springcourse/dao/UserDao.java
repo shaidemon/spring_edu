@@ -31,27 +31,41 @@ public class UserDao {
         return session.createQuery("select u from User u", User.class).getResultList();
     }
 
+    @Transactional(readOnly = true)
     public User getById(int id) {
-        return null;
+        Session session = sessionFactory.getCurrentSession();
+        return session.get(User.class, id);
     }
 
+    @Transactional(readOnly = true)
     public User getByEmail(String email) {
-        return null;
+        Session session = sessionFactory.getCurrentSession();
+        return session.createQuery("select u from User u where u.email=:e", User.class).setParameter("e", email).
+                getResultList().stream().findAny().orElse(null);
 //                jdbcTemplate.query("SELECT * FROM users WHERE email=?", new BeanPropertyRowMapper<>(User.class), email)
 //                .stream().findAny().orElse(null);
     }
 
+    @Transactional
     public void save(User user) {
+        Session session = sessionFactory.getCurrentSession();
+        session.save(user);
 //        jdbcTemplate.update("INSERT INTO users (name, age, email, address) VALUES (?,?,?,?)",
 //                user.getName(), user.getAge(), user.getEmail(), user.getAddress());
     }
 
+    @Transactional
     public void update(int id, User user) {
+        Session session = sessionFactory.getCurrentSession();
+        session.update(user);
 //        jdbcTemplate.update("UPDATE users SET name = ?, age = ?, email = ?, address = ? WHERE id = ?",
 //                user.getName(), user.getAge(), user.getEmail(), user.getAddress(), id);
     }
 
+    @Transactional
     public void delete(int id) {
+        Session session = sessionFactory.getCurrentSession();
+        session.remove(session.get(User.class, id));
 //        jdbcTemplate.update("DELETE FROM users WHERE id = ?", id);
     }
 

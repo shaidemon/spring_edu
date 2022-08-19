@@ -13,19 +13,19 @@ public class User {
 
     @NotEmpty(message = "Name should not be empty")
     @Size(min = 2, max = 30, message = "Name should be from 2 to 30 letters")
-    @Column(name = "name")
+//    @Column(name = "name")
     private  String name;
 
     @Min(value = 0, message = "Age should be more than 0")
-    @Column(name = "age")
+//    @Column(name = "age")
     private int age;
 
     @NotEmpty(message = " Email not be empty")
     @Email(message = "Email must be valid")
-    @Column(name = "email")
+//    @Column(name = "email")
     private String email;
 
-    @Column(name = "address")
+//    @Column(name = "address")
     @Pattern(regexp = "[A-Z]\\w+(\\h*\\w*)*, [A-Z]\\w+\\h*\\w*, \\d{6}", message = "Address should be this format: Country, City, 6-digits-zipcode")
     private String address;
 
