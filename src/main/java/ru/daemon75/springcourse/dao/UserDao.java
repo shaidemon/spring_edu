@@ -15,9 +15,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+//@Component
 public class UserDao {
-//    private final JdbcTemplate jdbcTemplate;
+/*    private final JdbcTemplate jdbcTemplate;
     private final SessionFactory sessionFactory;
 
     @Autowired
@@ -46,7 +46,6 @@ public class UserDao {
 //                .stream().findAny().orElse(null);
     }
 
-    @Transactional
     public void save(User user) {
         Session session = sessionFactory.getCurrentSession();
         session.save(user);
@@ -54,7 +53,6 @@ public class UserDao {
 //                user.getName(), user.getAge(), user.getEmail(), user.getAddress());
     }
 
-    @Transactional
     public void update(int id, User user) {
         Session session = sessionFactory.getCurrentSession();
         session.update(user);
@@ -62,7 +60,6 @@ public class UserDao {
 //                user.getName(), user.getAge(), user.getEmail(), user.getAddress(), id);
     }
 
-    @Transactional
     public void delete(int id) {
         Session session = sessionFactory.getCurrentSession();
         session.remove(session.get(User.class, id));

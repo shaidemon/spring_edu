@@ -28,6 +28,10 @@ public class UsersService {
         return user.orElse(null);
     }
 
+    public User getByEmail(String email) {
+         return usersRepository.findByEmail(email);
+    }
+
     @Transactional
     public void save(User user) {
         usersRepository.save(user);

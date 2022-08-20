@@ -7,4 +7,6 @@ import ru.daemon75.springcourse.models.User;
 @Repository
 public interface UsersRepository extends JpaRepository<User, Integer> {
 
+    User findByEmail(String email);
+
 }
